@@ -6,6 +6,124 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id      String   @id @default(uuid())
+  created DateTime @default(now())
+  updated DateTime @updatedAt @default(now())
+
+  firstName   String   @db.VarChar(64)
+  lastName    String   @db.VarChar(64)
+  username    String   @db.VarChar(64)
+  email       String?  @db.VarChar(128)
+  phoneNumber String?  @db.VarChar(16)
+  password    String   @db.Char(128)
+  role        UserRole @default(TEACHER)
+
+  @@unique([email])
+  @@unique([phoneNumber])
+}
+
+model Student {
+  id      String   @id @default(uuid())
+  created DateTime @default(now())
+  updated DateTime @updatedAt @default(now())
+
+  firstName   String  @db.VarChar(64)
+  lastName    String  @db.VarChar(64)
+  username    String  @db.VarChar(64)
+  email       String? @db.VarChar(128)
+  phoneNumber String? @db.VarChar(16)
+
+  enrolledClasses  Class[]
+  attendedSessions Session[]
+  paymentHistories PaymentHistory[]
+
+  @@unique([email])
+  @@unique([phoneNumber])
+}
+
+model Class {
+  id      String   @id @default(uuid())
+  created DateTime @default(now())
+  updated DateTime @updatedAt @default(now())
+
+  name           String      @db.VarChar(128)
+  description    String?     @db.VarChar(512)
+  paymentType    PaymentType @default(INDIVIDUAL)
+  fullCost       Float       @default(0)
+  individualCost Float       @default(0)
+
+  sessions   Session[]
+  students   Student[]
+  categories Category[]
+}
+
+model Session {
+  id      String   @id @default(uuid())
+  created DateTime @default(now())
+  updated DateTime @updatedAt @default(now())
+
+  class   Class  @relation(fields: [classId], references: [id])
+  classId String
+
+  attendedStudents Student[]
+  paymentDetails   PaymentDetail[]
+}
+
+model PaymentHistory {
+  id      String   @id @default(uuid())
+  created DateTime @default(now())
+  updated DateTime @updatedAt @default(now())
+
+  paymentStatus PaymentStatus @default(NOTICED)
+  totalCost     Float         @default(0)
+  note          String?       @db.VarChar(512)
+
+  details   PaymentDetail[]
+  student   Student         @relation(fields: [studentId], references: [id])
+  studentId String
+}
+
+model PaymentDetail {
+  id      String   @id @default(uuid())
+  created DateTime @default(now())
+  updated DateTime @updatedAt @default(now())
+
+  paymentHistory   PaymentHistory @relation(fields: [paymentHistoryId], references: [id])
+  paymentHistoryId String
+  session          Session        @relation(fields: [sessionId], references: [id])
+  sessionId        String
+}
+
+model Category {
+  id      String   @id @default(uuid())
+  created DateTime @default(now())
+  updated DateTime @updatedAt @default(now())
+
+  classes Class[]
+}
+
+enum UserRole {
+  TEACHER
+  STUDENT
+}
+
+enum StudentStatus {
+  ACTIVE
+  DROPOUT
+}
+
+enum PaymentStatus {
+  NOTICED
+  PAID
+  LATE
+}
+
+enum PaymentType {
+  FULL_PREPAID
+  INDIVIDUAL
 }
