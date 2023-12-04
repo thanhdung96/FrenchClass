@@ -11,6 +11,14 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "@app/base": ["shared/base"],
+      "@app/base/*": ["shared/base/*"],
+      "@app/core": ["src/core"],
+      "@app/core/*": ["src/core/*"],
+      "@app/api": ["src/api"],
+      "@app/api/*": ["src/api/*"],
+    }
   }
 }
