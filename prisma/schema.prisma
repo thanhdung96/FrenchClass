@@ -39,8 +39,8 @@ model Student {
   phoneNumber String? @db.VarChar(16)
 
   enrolledClasses  Class[]
-  attendedSessions Session[]
   paymentHistories PaymentHistory[]
+  attendedSession AttendanceDtail[]
 
   @@unique([email])
   @@unique([phoneNumber])
@@ -70,8 +70,23 @@ model Session {
   class   Class  @relation(fields: [classId], references: [id])
   classId String
 
-  attendedStudents Student[]
   paymentDetails   PaymentDetail[]
+  attendanceDetail AttendanceDtail[]
+}
+
+model AttendanceDtail {
+  id      String   @id @default(uuid())
+  created DateTime @default(now())
+  updated DateTime @updatedAt @default(now())
+
+  isPaid Boolean @default(false)
+
+  session Session @relation(fields: [sessionId], references: [id])
+  sessionId String
+  student Student @relation(fields: [studentId], references: [id])
+  studentId String
+
+  @@unique([sessionId, studentId])
 }
 
 model PaymentHistory {
