@@ -1,5 +1,5 @@
-export abstract class AbstractBaseModel {
+export interface IBaseDto {
   id: string;
-  created: Date;
-  updated: Date;
+  created?: Date;
+  updated?: Date;
 }

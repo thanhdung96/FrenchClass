@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AuthGuard } from '@app/core/security/auth.guard';
 import { APP_GUARD } from '@nestjs/core/constants';
-import { JwtModule } from '@nestjs/jwt';
 import { RouterModule } from '@nestjs/core';
 import { TeacherApiModule } from './core/api/teacher/teacher.api.module';
 import { SecurityApiModule } from './core/api/security/security.api.module';
+import { AppService } from './app/app.service';
+import { JwtAuthGuard } from './core/security/jwtauth.guard';
 
 @Module({
   imports: [
@@ -13,24 +13,20 @@ import { SecurityApiModule } from './core/api/security/security.api.module';
     RouterModule.register([
       {
         path: 'teacher',
-        module: TeacherApiModule
+        module: TeacherApiModule,
       },
       {
         path: 'security',
-        module: SecurityApiModule
+        module: SecurityApiModule,
       },
     ]),
-    JwtModule.register({
-      global: true,
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: process.env.JWT_DURATION },
-    }),
   ],
   providers: [
     {
       provide: APP_GUARD,
-      useClass: AuthGuard,
+      useClass: JwtAuthGuard,
     },
+    AppService,
   ],
 })
 export class AppModule {}
