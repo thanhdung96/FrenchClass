@@ -1,4 +1,4 @@
-export interface IBaseDto {
+export abstract class AbstractBaseDto {
   id: string;
   created?: Date;
   updated?: Date;

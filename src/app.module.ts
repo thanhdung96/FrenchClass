@@ -5,11 +5,13 @@ import { TeacherApiModule } from './core/api/teacher/teacher.api.module';
 import { SecurityApiModule } from './core/api/security/security.api.module';
 import { AppService } from './app/app.service';
 import { JwtAuthGuard } from './core/security/jwtauth.guard';
+import { CommonApiModule } from './core/api/common/common.api.module';
 
 @Module({
   imports: [
     TeacherApiModule,
     SecurityApiModule,
+    CommonApiModule,
     RouterModule.register([
       {
         path: 'teacher',
@@ -18,6 +20,10 @@ import { JwtAuthGuard } from './core/security/jwtauth.guard';
       {
         path: 'security',
         module: SecurityApiModule,
+      },
+      {
+        path: 'app',
+        module: CommonApiModule,
       },
     ]),
   ],

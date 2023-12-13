@@ -1,9 +1,9 @@
-import { IBaseDto } from './base.model';
+import { AbstractBaseDto } from './base.model';
 import { AbstractReadOnlyService } from './base.service';
 import { PaginationDto } from '@app/core/dto/pagination.dto';
 
 export abstract class AbstractBaseController {
-  constructor(private readonly service: AbstractReadOnlyService) {}
+  constructor(private readonly service: AbstractReadOnlyService | void) {}
 }
 
 export abstract class AbstractReadonlyController extends AbstractBaseController {
@@ -11,8 +11,8 @@ export abstract class AbstractReadonlyController extends AbstractBaseController 
     super(service);
   }
 
-  abstract index(query: PaginationDto): Promise<IBaseDto[]>;
-  abstract detail(id: string): Promise<IBaseDto>;
+  abstract index(query: PaginationDto): Promise<AbstractBaseDto[]>;
+  abstract detail(id: string): Promise<AbstractBaseDto>;
 }
 
 export abstract class AbstractCrudController extends AbstractReadonlyController {
@@ -20,6 +20,6 @@ export abstract class AbstractCrudController extends AbstractReadonlyController 
     super(service);
   }
 
-  abstract create(data: IBaseDto): Promise<IBaseDto>;
-  abstract patch(id: string, data: IBaseDto): Promise<IBaseDto>;
+  abstract create(data: AbstractBaseDto): Promise<AbstractBaseDto>;
+  abstract patch(id: string, data: AbstractBaseDto): Promise<AbstractBaseDto>;
 }

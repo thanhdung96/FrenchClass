@@ -3,6 +3,7 @@ import { StudentPaginationDto } from '@app/core/dto/pagination.dto';
 import { StudentDto } from '@app/core/dto/student.dto';
 import { StudentService } from '@app/core/module/student/student.service';
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -26,8 +27,14 @@ export class StudentController extends AbstractCrudController {
 
   @Post()
   async create(@Body() studentDto: StudentDto): Promise<StudentDto> {
-    const student = await this.studentService.save(studentDto);
+    const validateResult = await this.studentService.validate(studentDto);
+    console.log(validateResult);
 
+    if (!validateResult.isValid) {
+      throw new BadRequestException(validateResult.messages);
+    }
+
+    const student = await this.studentService.save(studentDto);
     return student;
   }
 

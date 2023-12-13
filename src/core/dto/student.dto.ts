@@ -1,17 +1,40 @@
-import { IBaseDto } from '@app/base/base.model';
+import { AbstractBaseDto } from '@app/base/base.model';
+import { Length, IsEmail, MaxLength, IsPhoneNumber } from 'class-validator';
 
-export interface StudentDto extends IBaseDto {
+export class StudentDto extends AbstractBaseDto {
+  @Length(1, 64)
   firstName: string;
+
+  @Length(1, 64)
   lastName: string;
+
+  @Length(1, 64)
   username: string;
-  email?: string | undefined;
-  phoneNumber?: string | undefined;
+
+  @Length(1, 128)
+  @IsEmail()
+  email: string;
+
+  @MaxLength(16)
+  @IsPhoneNumber('VI')
+  phoneNumber?: string;
 }
 
-export interface StudentDetailDto extends IBaseDto {
+export class StudentDetailDto extends AbstractBaseDto {
+  @Length(1, 64)
   firstName: string;
+
+  @Length(1, 64)
   lastName: string;
+
+  @Length(1, 64)
   username: string;
-  email?: string | undefined;
-  phoneNumber?: string | undefined;
+
+  @Length(1, 128)
+  @IsEmail()
+  email?: string;
+
+  @MaxLength(16)
+  @IsPhoneNumber('VI')
+  phoneNumber?: string;
 }

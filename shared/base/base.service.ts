@@ -1,13 +1,14 @@
 import { PrismaClient } from '@prisma/client';
-import { IBaseDto } from './base.model';
+import { AbstractBaseDto } from './base.model';
 import { PaginationDto } from '@app/core/dto/pagination.dto';
+import { AbstractValidateResult } from '@app/core/dto/validate.dto';
 
 export interface IReadOnlyService {
-  getAll(pagination: PaginationDto): Promise<IBaseDto[]>;
+  getAll(pagination: PaginationDto): Promise<AbstractBaseDto[]>;
 
-  getById(id: string): Promise<IBaseDto>;
+  getById(id: string): Promise<AbstractBaseDto>;
 
-  getManyByFilter(filter: IBaseDto): Promise<IBaseDto[]>;
+  getManyByFilter(filter: AbstractBaseDto): Promise<AbstractBaseDto[]>;
 }
 
 export abstract class AbstractReadOnlyService implements IReadOnlyService {
@@ -17,21 +18,25 @@ export abstract class AbstractReadOnlyService implements IReadOnlyService {
     this.prisma = new PrismaClient();
   }
 
-  abstract getAll(pagination: PaginationDto): Promise<IBaseDto[]>;
+  abstract getAll(pagination: PaginationDto): Promise<AbstractBaseDto[]>;
 
-  abstract getById(id: string): Promise<IBaseDto | null>;
+  abstract getById(id: string): Promise<AbstractBaseDto | null>;
 
-  abstract getManyByFilter(filter: IBaseDto): Promise<IBaseDto[]>;
+  abstract getManyByFilter(filter: AbstractBaseDto): Promise<AbstractBaseDto[]>;
 }
 
 export interface ICrudService extends IReadOnlyService {
-  save(entity: IBaseDto): Promise<IBaseDto | null>;
+  save(entity: AbstractBaseDto): Promise<AbstractBaseDto | null>;
 
-  saveMany(entities: IBaseDto[]): Promise<void>;
+  saveMany(entities: AbstractBaseDto[]): Promise<void>;
 
-  update(id: string, entity: IBaseDto): Promise<IBaseDto>;
+  update(id: string, entity: AbstractBaseDto): Promise<AbstractBaseDto>;
 
-  delete(entity: IBaseDto): Promise<boolean>;
+  delete(entity: AbstractBaseDto): Promise<boolean>;
+
+  validate(entity: AbstractBaseDto): Promise<AbstractValidateResult>;
+
+  generateErrorMessages(validateResult: AbstractValidateResult): AbstractValidateResult;
 }
 
 export abstract class AbstractCrudService
@@ -42,11 +47,15 @@ export abstract class AbstractCrudService
     super();
   }
 
-  abstract update(id: string, entity: IBaseDto): Promise<IBaseDto>;
+  abstract update(id: string, entity: AbstractBaseDto): Promise<AbstractBaseDto>;
 
-  abstract save(entity: IBaseDto): Promise<IBaseDto>;
+  abstract save(entity: AbstractBaseDto): Promise<AbstractBaseDto>;
 
-  abstract saveMany(entities: IBaseDto[]): Promise<void>;
+  abstract saveMany(entities: AbstractBaseDto[]): Promise<void>;
 
-  abstract delete(entity: IBaseDto): Promise<boolean>;
+  abstract delete(entity: AbstractBaseDto): Promise<boolean>;
+
+  abstract validate(entity: AbstractBaseDto): Promise<AbstractValidateResult>;
+
+  abstract generateErrorMessages(validateResult: AbstractValidateResult): AbstractValidateResult;
 }

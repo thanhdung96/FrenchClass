@@ -1,10 +1,13 @@
-import { IBaseDto } from '@app/base/base.model';
+import { AbstractBaseDto } from '@app/base/base.model';
+import { Length } from 'class-validator';
 
-export interface LoginDto extends IBaseDto {
+export class LoginDto extends AbstractBaseDto {
+  @Length(1, 64)
   username: string;
+
   password: string;
 }
 
-export interface AccessTokenDto {
+export class AccessTokenDto {
   accessToken: string;
 }
