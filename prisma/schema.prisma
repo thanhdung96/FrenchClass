@@ -17,14 +17,11 @@ model User {
 
   firstName   String   @db.VarChar(64)
   lastName    String   @db.VarChar(64)
-  username    String   @db.VarChar(64)
-  email       String?  @db.VarChar(128)
+  username    String   @db.VarChar(64) @unique
+  email       String?  @db.VarChar(128) @unique
   phoneNumber String?  @db.VarChar(16)
   password    String   @db.Char(128)
   role        UserRole @default(TEACHER)
-
-  @@unique([email])
-  @@unique([phoneNumber])
 }
 
 model Student {
@@ -40,7 +37,7 @@ model Student {
 
   enrolledClasses  Class[]
   paymentHistories PaymentHistory[]
-  attendedSession AttendanceDtail[]
+  attendedSession AttendanceDetail[]
 
   @@unique([email])
   @@unique([phoneNumber])
@@ -71,10 +68,10 @@ model Session {
   classId String
 
   paymentDetails   PaymentDetail[]
-  attendanceDetail AttendanceDtail[]
+  attendanceDetail AttendanceDetail[]
 }
 
-model AttendanceDtail {
+model AttendanceDetail {
   id      String   @id @default(uuid())
   created DateTime @default(now())
   updated DateTime @updatedAt @default(now())

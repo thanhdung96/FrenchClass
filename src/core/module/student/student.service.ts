@@ -1,7 +1,11 @@
-import { IBaseDto } from '@app/base/base.model';
+import { AbstractBaseDto } from '@app/base/base.model';
 import { AbstractCrudService } from '@app/base/base.service';
 import { StudentPaginationDto } from '@app/core/dto/pagination.dto';
 import { StudentDto } from '@app/core/dto/student.dto';
+import {
+  AbstractValidateResult,
+  StudentValidateResult,
+} from '@app/core/dto/validate.dto';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -20,7 +24,7 @@ export class StudentService extends AbstractCrudService {
     return student;
   }
 
-  saveMany(entities: StudentDto[]): Promise<void> {
+  async saveMany(entities: StudentDto[]): Promise<void> {
     throw new Error('Method not implemented.');
   }
 
@@ -37,7 +41,7 @@ export class StudentService extends AbstractCrudService {
     return student;
   }
 
-  delete(entity: StudentDto): Promise<boolean> {
+  async delete(entity: StudentDto): Promise<boolean> {
     throw new Error('Method not implemented.');
   }
 
@@ -60,7 +64,56 @@ export class StudentService extends AbstractCrudService {
     return student;
   }
 
-  getManyByFilter(filter: IBaseDto): Promise<StudentDto[]> {
+  async getManyByFilter(filter: AbstractBaseDto): Promise<StudentDto[]> {
     throw new Error('Method not implemented.');
+  }
+
+  async validate({
+    username,
+    email,
+  }: StudentDto): Promise<StudentValidateResult> {
+    // aggregating through requirements
+    const aggregateUsername = await this.prisma.student.aggregate({
+      _count: {
+        username: true,
+      },
+      where: {
+        username,
+      },
+    });
+    const aggregateEmail = await this.prisma.student.aggregate({
+      _count: {
+        email: true,
+      },
+      where: {
+        email,
+      },
+    });
+
+    // generating result
+    const result = this.generateErrorMessages({
+      username: aggregateUsername._count.username,
+      email: aggregateEmail._count.email,
+    });
+
+    return result;
+  }
+
+  generateErrorMessages(
+    validateResult: StudentValidateResult,
+  ): StudentValidateResult {
+    validateResult.isValid =
+      validateResult.email == 0 && validateResult.username == 0;
+
+    let messages = [];
+    if (validateResult.email != 0) {
+      messages.push('duplicated email');
+    }
+    if (validateResult.username != 0) {
+      messages.push('duplicated username');
+    }
+    validateResult.messages = messages;
+
+    return validateResult;
   }
 }
