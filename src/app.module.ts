@@ -6,6 +6,7 @@ import { SecurityApiModule } from './core/api/security/security.api.module';
 import { AppService } from './app/app.service';
 import { JwtAuthGuard } from './core/security/jwtauth.guard';
 import { CommonApiModule } from './core/api/common/common.api.module';
+import { RootController } from './root.controller';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { CommonApiModule } from './core/api/common/common.api.module';
       },
     ]),
   ],
+  controllers: [RootController],
   providers: [
     {
       provide: APP_GUARD,

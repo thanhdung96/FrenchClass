@@ -13,8 +13,10 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 
 @Controller('students')
+@ApiTags('student')
 export class StudentController extends AbstractCrudController {
   constructor(private readonly studentService: StudentService) {
     super(studentService);

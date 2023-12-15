@@ -2,9 +2,11 @@ import { SecurityService } from '@app/core/module/security/security.service';
 import { LocalAuthGuard } from '@app/core/security/local.guard';
 import { Public } from '@app/core/security/public.decorator';
 import { Controller, Post, Request, UseGuards } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller()
 @Public()
+@ApiTags('security')
 export class SecurityController {
   constructor(private readonly securityService: SecurityService) {}
 
