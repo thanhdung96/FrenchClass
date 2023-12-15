@@ -3,8 +3,10 @@ import { RegisterUserDto, UserDto } from '@app/core/dto/user.dto';
 import { UserService } from '@app/core/module/user/user.service';
 import { Public } from '@app/core/security/public.decorator';
 import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller()
+@ApiTags('app')
 export class CommonController extends AbstractBaseController {
   constructor(private readonly userService: UserService) {
     super();
