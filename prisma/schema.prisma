@@ -13,21 +13,23 @@ datasource db {
 model User {
   id      String   @id @default(uuid())
   created DateTime @default(now())
-  updated DateTime @updatedAt @default(now())
+  updated DateTime @default(now()) @updatedAt
 
   firstName   String   @db.VarChar(64)
   lastName    String   @db.VarChar(64)
-  username    String   @db.VarChar(64) @unique
-  email       String?  @db.VarChar(128) @unique
+  username    String   @unique @db.VarChar(64)
+  email       String?  @unique @db.VarChar(128)
   phoneNumber String?  @db.VarChar(16)
   password    String   @db.Char(128)
   role        UserRole @default(TEACHER)
+
+  class Class[]
 }
 
 model Student {
   id      String   @id @default(uuid())
   created DateTime @default(now())
-  updated DateTime @updatedAt @default(now())
+  updated DateTime @default(now()) @updatedAt
 
   firstName   String  @db.VarChar(64)
   lastName    String  @db.VarChar(64)
@@ -37,7 +39,7 @@ model Student {
 
   enrolledClasses  Class[]
   paymentHistories PaymentHistory[]
-  attendedSession AttendanceDetail[]
+  attendedSession  AttendanceDetail[]
 
   @@unique([email])
   @@unique([phoneNumber])
@@ -46,7 +48,7 @@ model Student {
 model Class {
   id      String   @id @default(uuid())
   created DateTime @default(now())
-  updated DateTime @updatedAt @default(now())
+  updated DateTime @default(now()) @updatedAt
 
   name           String      @db.VarChar(128)
   description    String?     @db.VarChar(512)
@@ -54,19 +56,23 @@ model Class {
   fullCost       Float       @default(0)
   individualCost Float       @default(0)
 
-  sessions   Session[]
-  students   Student[]
-  categories Category[]
+  mainTeacher   User       @relation(fields: [mainTeacherId], references: [id])
+  mainTeacherId String
+  sessions      Session[]
+  students      Student[]
+  categories    Category[]
 }
 
 model Session {
   id      String   @id @default(uuid())
   created DateTime @default(now())
-  updated DateTime @updatedAt @default(now())
+  updated DateTime @default(now()) @updatedAt
 
-  class   Class  @relation(fields: [classId], references: [id])
-  classId String
+  sessionName String  @db.VarChar(64)
+  description String? @db.VarChar(512)
 
+  class            Class              @relation(fields: [classId], references: [id])
+  classId          String
   paymentDetails   PaymentDetail[]
   attendanceDetail AttendanceDetail[]
 }
@@ -74,13 +80,13 @@ model Session {
 model AttendanceDetail {
   id      String   @id @default(uuid())
   created DateTime @default(now())
-  updated DateTime @updatedAt @default(now())
+  updated DateTime @default(now()) @updatedAt
 
   isPaid Boolean @default(false)
 
-  session Session @relation(fields: [sessionId], references: [id])
+  session   Session @relation(fields: [sessionId], references: [id])
   sessionId String
-  student Student @relation(fields: [studentId], references: [id])
+  student   Student @relation(fields: [studentId], references: [id])
   studentId String
 
   @@unique([sessionId, studentId])
@@ -89,7 +95,7 @@ model AttendanceDetail {
 model PaymentHistory {
   id      String   @id @default(uuid())
   created DateTime @default(now())
-  updated DateTime @updatedAt @default(now())
+  updated DateTime @default(now()) @updatedAt
 
   paymentStatus PaymentStatus @default(NOTICED)
   totalCost     Float         @default(0)
@@ -103,7 +109,7 @@ model PaymentHistory {
 model PaymentDetail {
   id      String   @id @default(uuid())
   created DateTime @default(now())
-  updated DateTime @updatedAt @default(now())
+  updated DateTime @default(now()) @updatedAt
 
   paymentHistory   PaymentHistory @relation(fields: [paymentHistoryId], references: [id])
   paymentHistoryId String
@@ -114,7 +120,7 @@ model PaymentDetail {
 model Category {
   id      String   @id @default(uuid())
   created DateTime @default(now())
-  updated DateTime @updatedAt @default(now())
+  updated DateTime @default(now()) @updatedAt
 
   classes Class[]
 }

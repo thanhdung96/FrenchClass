@@ -11,8 +11,8 @@ CREATE TABLE `User` (
     `password` CHAR(128) NOT NULL,
     `role` ENUM('TEACHER', 'STUDENT') NOT NULL DEFAULT 'TEACHER',
 
+    UNIQUE INDEX `User_username_key`(`username`),
     UNIQUE INDEX `User_email_key`(`email`),
-    UNIQUE INDEX `User_phoneNumber_key`(`phoneNumber`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -42,6 +42,7 @@ CREATE TABLE `Class` (
     `paymentType` ENUM('FULL_PREPAID', 'INDIVIDUAL') NOT NULL DEFAULT 'INDIVIDUAL',
     `fullCost` DOUBLE NOT NULL DEFAULT 0,
     `individualCost` DOUBLE NOT NULL DEFAULT 0,
+    `mainTeacherId` VARCHAR(191) NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -51,8 +52,23 @@ CREATE TABLE `Session` (
     `id` VARCHAR(191) NOT NULL,
     `created` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `sessionName` VARCHAR(64) NOT NULL,
+    `description` VARCHAR(512) NULL,
     `classId` VARCHAR(191) NOT NULL,
 
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `AttendanceDetail` (
+    `id` VARCHAR(191) NOT NULL,
+    `created` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `isPaid` BOOLEAN NOT NULL DEFAULT false,
+    `sessionId` VARCHAR(191) NOT NULL,
+    `studentId` VARCHAR(191) NOT NULL,
+
+    UNIQUE INDEX `AttendanceDetail_sessionId_studentId_key`(`sessionId`, `studentId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -99,15 +115,6 @@ CREATE TABLE `_ClassToStudent` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `_SessionToStudent` (
-    `A` VARCHAR(191) NOT NULL,
-    `B` VARCHAR(191) NOT NULL,
-
-    UNIQUE INDEX `_SessionToStudent_AB_unique`(`A`, `B`),
-    INDEX `_SessionToStudent_B_index`(`B`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
 CREATE TABLE `_CategoryToClass` (
     `A` VARCHAR(191) NOT NULL,
     `B` VARCHAR(191) NOT NULL,
@@ -117,7 +124,16 @@ CREATE TABLE `_CategoryToClass` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
+ALTER TABLE `Class` ADD CONSTRAINT `Class_mainTeacherId_fkey` FOREIGN KEY (`mainTeacherId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `Session` ADD CONSTRAINT `Session_classId_fkey` FOREIGN KEY (`classId`) REFERENCES `Class`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `AttendanceDetail` ADD CONSTRAINT `AttendanceDetail_sessionId_fkey` FOREIGN KEY (`sessionId`) REFERENCES `Session`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `AttendanceDetail` ADD CONSTRAINT `AttendanceDetail_studentId_fkey` FOREIGN KEY (`studentId`) REFERENCES `Student`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `PaymentHistory` ADD CONSTRAINT `PaymentHistory_studentId_fkey` FOREIGN KEY (`studentId`) REFERENCES `Student`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -133,12 +149,6 @@ ALTER TABLE `_ClassToStudent` ADD CONSTRAINT `_ClassToStudent_A_fkey` FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE `_ClassToStudent` ADD CONSTRAINT `_ClassToStudent_B_fkey` FOREIGN KEY (`B`) REFERENCES `Student`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `_SessionToStudent` ADD CONSTRAINT `_SessionToStudent_A_fkey` FOREIGN KEY (`A`) REFERENCES `Session`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `_SessionToStudent` ADD CONSTRAINT `_SessionToStudent_B_fkey` FOREIGN KEY (`B`) REFERENCES `Student`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `_CategoryToClass` ADD CONSTRAINT `_CategoryToClass_A_fkey` FOREIGN KEY (`A`) REFERENCES `Category`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

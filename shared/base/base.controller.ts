@@ -11,8 +11,8 @@ export abstract class AbstractReadonlyController extends AbstractBaseController 
     super(service);
   }
 
-  abstract index(query: PaginationDto): Promise<AbstractBaseDto[]>;
-  abstract detail(id: string): Promise<AbstractBaseDto>;
+  abstract index(request: any, query: PaginationDto): Promise<AbstractBaseDto[]>;
+  abstract detail(request: any, id: string): Promise<AbstractBaseDto>;
 }
 
 export abstract class AbstractCrudController extends AbstractReadonlyController {
@@ -20,6 +20,6 @@ export abstract class AbstractCrudController extends AbstractReadonlyController 
     super(service);
   }
 
-  abstract create(data: AbstractBaseDto): Promise<AbstractBaseDto>;
-  abstract patch(id: string, data: AbstractBaseDto): Promise<AbstractBaseDto>;
+  abstract create(request: any, data: AbstractBaseDto): Promise<AbstractBaseDto>;
+  abstract patch(request: any, id: string, data: AbstractBaseDto): Promise<AbstractBaseDto>;
 }

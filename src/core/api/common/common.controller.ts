@@ -2,7 +2,14 @@ import { AbstractBaseController } from '@app/base/base.controller';
 import { RegisterUserDto, UserDto } from '@app/core/dto/user.dto';
 import { UserService } from '@app/core/module/user/user.service';
 import { Public } from '@app/core/security/public.decorator';
-import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Post,
+  Request,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 @Controller()
@@ -23,5 +30,14 @@ export class CommonController extends AbstractBaseController {
     const user = await this.userService.register(userDto);
 
     return user;
+  }
+
+  @Get('/profile')
+  async getProfile(@Request() request): Promise<UserDto> {
+    const userProfile = await this.userService.getById(request.user.id);
+
+    const { password, ...returnData } = userProfile;
+
+    return returnData;
   }
 }

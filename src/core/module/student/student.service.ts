@@ -1,6 +1,10 @@
 import { AbstractBaseDto } from '@app/base/base.model';
 import { AbstractCrudService } from '@app/base/base.service';
-import { StudentPaginationDto } from '@app/core/dto/pagination.dto';
+import { ClassDto } from '@app/core/dto/class.dto';
+import {
+  PaginationDto,
+  StudentPaginationDto,
+} from '@app/core/dto/pagination.dto';
 import { StudentDto } from '@app/core/dto/student.dto';
 import {
   AbstractValidateResult,
@@ -24,7 +28,7 @@ export class StudentService extends AbstractCrudService {
     return student;
   }
 
-  async saveMany(entities: StudentDto[]): Promise<void> {
+  async saveMany(entities: StudentDto[]): Promise<StudentDto[]> {
     throw new Error('Method not implemented.');
   }
 
@@ -54,7 +58,7 @@ export class StudentService extends AbstractCrudService {
     return students;
   }
 
-  async getById(id: string): Promise<StudentDto | null> {
+  async getById(id: string): Promise<StudentDto> {
     const student = await this.prisma.student.findUnique({
       where: {
         id,
@@ -64,7 +68,10 @@ export class StudentService extends AbstractCrudService {
     return student;
   }
 
-  async getManyByFilter(filter: AbstractBaseDto): Promise<StudentDto[]> {
+  async getManyByFilter(
+    filter: AbstractBaseDto,
+    pagination: PaginationDto,
+  ): Promise<StudentDto[]> {
     throw new Error('Method not implemented.');
   }
 
@@ -115,5 +122,12 @@ export class StudentService extends AbstractCrudService {
     validateResult.messages = messages;
 
     return validateResult;
+  }
+
+  async checkIfStudentInClass(
+    student: StudentDto,
+    classToCheck: ClassDto,
+  ): Promise<boolean> {
+    return true;
   }
 }
