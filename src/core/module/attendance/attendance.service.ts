@@ -18,7 +18,7 @@ export class AttendanceService extends AbstractCrudService {
     throw new Error('Method not implemented.');
   }
 
-  async saveMany(entities: AbstractBaseDto[]): Promise<void> {
+  async saveMany(entities: AbstractBaseDto[]): Promise<AbstractBaseDto[]> {
     throw new Error('Method not implemented.');
   }
 

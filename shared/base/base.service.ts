@@ -8,7 +8,7 @@ export interface IReadOnlyService {
 
   getById(id: string): Promise<AbstractBaseDto>;
 
-  getManyByFilter(filter: AbstractBaseDto): Promise<AbstractBaseDto[]>;
+  getManyByFilter(filter: AbstractBaseDto, pagination: PaginationDto): Promise<AbstractBaseDto[]>;
 }
 
 export abstract class AbstractReadOnlyService implements IReadOnlyService {
@@ -22,13 +22,13 @@ export abstract class AbstractReadOnlyService implements IReadOnlyService {
 
   abstract getById(id: string): Promise<AbstractBaseDto | null>;
 
-  abstract getManyByFilter(filter: AbstractBaseDto): Promise<AbstractBaseDto[]>;
+  abstract getManyByFilter(filter: AbstractBaseDto, pagination: PaginationDto): Promise<AbstractBaseDto[]>;
 }
 
 export interface ICrudService extends IReadOnlyService {
   save(entity: AbstractBaseDto): Promise<AbstractBaseDto | null>;
 
-  saveMany(entities: AbstractBaseDto[]): Promise<void>;
+  saveMany(entities: AbstractBaseDto[]): Promise<AbstractBaseDto[]>;
 
   update(id: string, entity: AbstractBaseDto): Promise<AbstractBaseDto>;
 
@@ -51,7 +51,7 @@ export abstract class AbstractCrudService
 
   abstract save(entity: AbstractBaseDto): Promise<AbstractBaseDto>;
 
-  abstract saveMany(entities: AbstractBaseDto[]): Promise<void>;
+  abstract saveMany(entities: AbstractBaseDto[]): Promise<AbstractBaseDto[]>;
 
   abstract delete(entity: AbstractBaseDto): Promise<boolean>;
 

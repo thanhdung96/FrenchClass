@@ -12,8 +12,9 @@ import {
   Patch,
   Post,
   Query,
+  Request,
 } from '@nestjs/common';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('students')
 @ApiTags('student')
@@ -23,12 +24,18 @@ export class StudentController extends AbstractCrudController {
   }
 
   @Get()
-  async index(@Query() query: StudentPaginationDto): Promise<StudentDto[]> {
+  async index(
+    @Request() request: any,
+    @Query() query: StudentPaginationDto,
+  ): Promise<StudentDto[]> {
     return await this.studentService.getAll(query);
   }
 
   @Post()
-  async create(@Body() studentDto: StudentDto): Promise<StudentDto> {
+  async create(
+    @Request() request: any,
+    @Body() studentDto: StudentDto,
+  ): Promise<StudentDto> {
     const validateResult = await this.studentService.validate(studentDto);
     console.log(validateResult);
 
@@ -42,6 +49,7 @@ export class StudentController extends AbstractCrudController {
 
   @Patch(':id')
   async patch(
+    @Request() request: any,
     @Param('id') id: string,
     @Body() studentDto: StudentDto,
   ): Promise<StudentDto> {

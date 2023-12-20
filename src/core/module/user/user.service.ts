@@ -1,10 +1,8 @@
 import { AbstractBaseDto } from '@app/base/base.model';
 import { AbstractCrudService } from '@app/base/base.service';
+import { PaginationDto } from '@app/core/dto/pagination.dto';
 import { RegisterUserDto, UserDto } from '@app/core/dto/user.dto';
-import {
-  AbstractValidateResult,
-  RegistrationValidateResult,
-} from '@app/core/dto/validate.dto';
+import { RegistrationValidateResult } from '@app/core/dto/validate.dto';
 import { Injectable } from '@nestjs/common';
 import { DEFAULT_USER_PASSWORD } from 'src/app/constants';
 import { encryptPassword } from 'src/app/encryption.service';
@@ -30,16 +28,6 @@ export class UserService extends AbstractCrudService {
   }
 
   async save(userDto: RegisterUserDto): Promise<UserDto> {
-    console.log(
-      await this.prisma.user.aggregate({
-        _count: {
-          username: true,
-        },
-        where: {
-          username: userDto.username,
-        },
-      }),
-    );
     const user = await this.prisma.user.create({
       data: {
         ...userDto,
@@ -49,7 +37,7 @@ export class UserService extends AbstractCrudService {
     return user;
   }
 
-  saveMany(entities: UserDto[]): Promise<void> {
+  saveMany(entities: UserDto[]): Promise<UserDto[]> {
     throw new Error('Method not implemented.');
   }
 
@@ -61,17 +49,26 @@ export class UserService extends AbstractCrudService {
     throw new Error('Method not implemented.');
   }
 
-  getById(id: string): Promise<UserDto> {
-    throw new Error('Method not implemented.');
+  async getById(id: string): Promise<UserDto> {
+    return await this.prisma.user.findFirst({
+      where: {
+        id,
+      },
+    });
   }
 
   async getUserByUsername(username: string): Promise<UserDto | null> {
     return await this.prisma.user.findFirst({ where: { username } });
   }
 
-  async getManyByFilter(filter: AbstractBaseDto): Promise<UserDto[]> {
+  async getManyByFilter(
+    filter: AbstractBaseDto,
+    pagination: PaginationDto,
+  ): Promise<UserDto[]> {
     return await this.prisma.user.findMany({
       where: { ...filter },
+      skip: pagination.page * pagination.size,
+      take: pagination.size,
     });
   }
 
