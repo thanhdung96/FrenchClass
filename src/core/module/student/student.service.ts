@@ -11,6 +11,7 @@ import {
   StudentValidateResult,
 } from '@app/core/dto/validate.dto';
 import { Injectable } from '@nestjs/common';
+import { Student } from '@prisma/client';
 
 @Injectable()
 export class StudentService extends AbstractCrudService {
@@ -18,7 +19,7 @@ export class StudentService extends AbstractCrudService {
     super();
   }
 
-  async save(entity: StudentDto): Promise<StudentDto> {
+  async save(entity: StudentDto): Promise<Student> {
     const student = await this.prisma.student.create({
       data: {
         ...entity,
@@ -32,7 +33,7 @@ export class StudentService extends AbstractCrudService {
     throw new Error('Method not implemented.');
   }
 
-  async update(id: string, entity: StudentDto): Promise<StudentDto> {
+  async update(id: string, entity: StudentDto): Promise<Student> {
     const student = await this.prisma.student.update({
       where: {
         id,
@@ -49,7 +50,7 @@ export class StudentService extends AbstractCrudService {
     throw new Error('Method not implemented.');
   }
 
-  async getAll(pagination: StudentPaginationDto): Promise<StudentDto[]> {
+  async getAll(pagination: StudentPaginationDto): Promise<Student[]> {
     const students = await this.prisma.student.findMany({
       skip: pagination.page * pagination.size,
       take: Number(pagination.size),
@@ -58,7 +59,7 @@ export class StudentService extends AbstractCrudService {
     return students;
   }
 
-  async getById(id: string): Promise<StudentDto> {
+  async getById(id: string): Promise<Student | null> {
     const student = await this.prisma.student.findUnique({
       where: {
         id,

@@ -37,8 +37,6 @@ export class StudentController extends AbstractCrudController {
     @Body() studentDto: StudentDto,
   ): Promise<StudentDto> {
     const validateResult = await this.studentService.validate(studentDto);
-    console.log(validateResult);
-
     if (!validateResult.isValid) {
       throw new BadRequestException(validateResult.messages);
     }

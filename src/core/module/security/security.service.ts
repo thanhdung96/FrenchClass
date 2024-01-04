@@ -4,6 +4,7 @@ import { verifyPassword } from 'src/app/encryption.service';
 import { UserDto } from '@app/core/dto/user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { AccessTokenDto } from '@app/core/dto/security.dto';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class SecurityService {
@@ -12,7 +13,7 @@ export class SecurityService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async validateUser(username: string, password: string): Promise<UserDto> {
+  async validateUser(username: string, password: string): Promise<User> {
     const user = await this.userService.getUserByUsername(username);
 
     if (user == null) {
@@ -20,8 +21,7 @@ export class SecurityService {
     }
 
     if (await verifyPassword(user.password, password)) {
-      const { password, ...result } = user;
-      return result;
+      return user;
     }
   }
 
