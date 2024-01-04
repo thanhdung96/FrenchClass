@@ -35,5 +35,18 @@ export class CommonController extends AbstractBaseController {
 
   @Public()
   @Post('/forgot-password')
-  async fotgot(@Body() { username }: ForgotPasswordDto): Promise<void> {}
+  async fotgot(@Body() { username }: ForgotPasswordDto): Promise<any> {
+    let userToUpdate = await this.userService.getUserByUsername(username);
+
+    if (!userToUpdate) {
+      return {
+        message: 'password changed',
+      };
+    }
+
+    userToUpdate = await this.userService.forgotPassword(userToUpdate);
+    return {
+      message: 'password changed',
+    };
+  }
 }

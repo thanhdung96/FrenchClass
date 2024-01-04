@@ -14,22 +14,31 @@ export class UserService extends AbstractCrudService {
     super();
   }
 
-  update(id: string, entity: UserDto): Promise<User> {
-    throw new Error('Method not implemented.');
+  async update(id: string, entity: UserDto): Promise<User> {
+    const udpatedUser = await this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        ...entity,
+      },
+    });
+
+    return udpatedUser;
   }
 
   async changePassword(userDto: User, newPassword: string): Promise<User> {
     userDto.password = await encryptPassword(newPassword);
-    const user = await this.save(userDto);
+    const user = await this.update(userDto.id, userDto);
 
     return user;
   }
 
-  async forgotPassword(userDto: RegisterUserDto): Promise<User> {
+  async forgotPassword(userDto: User): Promise<User> {
     userDto.password = await encryptPassword(
       Math.random().toString(36).slice(-8),
     );
-    const user = await this.save(userDto);
+    const user = await this.update(userDto.id, userDto);
 
     return user;
   }
