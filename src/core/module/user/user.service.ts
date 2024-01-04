@@ -4,6 +4,7 @@ import { PaginationDto } from '@app/core/dto/pagination.dto';
 import { RegisterUserDto, UserDto } from '@app/core/dto/user.dto';
 import { RegistrationValidateResult } from '@app/core/dto/validate.dto';
 import { Injectable } from '@nestjs/common';
+import { User } from '@prisma/client';
 import { DEFAULT_USER_PASSWORD } from 'src/app/constants';
 import { encryptPassword } from 'src/app/encryption.service';
 
@@ -13,21 +14,36 @@ export class UserService extends AbstractCrudService {
     super();
   }
 
-  update(id: string, entity: UserDto): Promise<UserDto> {
+  update(id: string, entity: UserDto): Promise<User> {
     throw new Error('Method not implemented.');
   }
 
-  async register(userDto: RegisterUserDto): Promise<UserDto> {
+  async changePassword(userDto: User, newPassword: string): Promise<User> {
+    userDto.password = await encryptPassword(newPassword);
+    const user = await this.save(userDto);
+
+    return user;
+  }
+
+  async forgotPassword(userDto: RegisterUserDto): Promise<User> {
+    userDto.password = await encryptPassword(
+      Math.random().toString(36).slice(-8),
+    );
+    const user = await this.save(userDto);
+
+    return user;
+  }
+
+  async register(userDto: RegisterUserDto): Promise<User> {
     userDto.password = await encryptPassword(
       userDto.password || DEFAULT_USER_PASSWORD,
     );
     const user = await this.save(userDto);
 
-    const { password, ...result } = user;
-    return result;
+    return user;
   }
 
-  async save(userDto: RegisterUserDto): Promise<UserDto> {
+  async save(userDto: RegisterUserDto): Promise<User> {
     const user = await this.prisma.user.create({
       data: {
         ...userDto,
@@ -45,11 +61,11 @@ export class UserService extends AbstractCrudService {
     throw new Error('Method not implemented.');
   }
 
-  getAll(): Promise<UserDto[]> {
+  getAll(): Promise<User[]> {
     throw new Error('Method not implemented.');
   }
 
-  async getById(id: string): Promise<UserDto> {
+  async getById(id: string): Promise<User> {
     return await this.prisma.user.findFirst({
       where: {
         id,
@@ -57,14 +73,14 @@ export class UserService extends AbstractCrudService {
     });
   }
 
-  async getUserByUsername(username: string): Promise<UserDto | null> {
+  async getUserByUsername(username: string): Promise<User | null> {
     return await this.prisma.user.findFirst({ where: { username } });
   }
 
   async getManyByFilter(
     filter: AbstractBaseDto,
     pagination: PaginationDto,
-  ): Promise<UserDto[]> {
+  ): Promise<User[]> {
     return await this.prisma.user.findMany({
       where: { ...filter },
       skip: pagination.page * pagination.size,
