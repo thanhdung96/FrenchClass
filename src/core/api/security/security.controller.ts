@@ -1,13 +1,20 @@
+import { ApiResponseDto } from '@app/core/dto/response.dto';
 import {
   ChangePasswordDto,
   ForgotPasswordDto,
 } from '@app/core/dto/security.dto';
-import { RegisterUserDto } from '@app/core/dto/user.dto';
 import { SecurityService } from '@app/core/module/security/security.service';
 import { UserService } from '@app/core/module/user/user.service';
 import { LocalAuthGuard } from '@app/core/security/local.guard';
 import { Public } from '@app/core/security/public.decorator';
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpStatus,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 @Controller()
@@ -25,18 +32,23 @@ export class SecurityController {
     return this.securityService.login(req.user);
   }
 
-  // TODO: integrate ApiResponseDto from branch manages_class
   @Public()
   @Post('forgot-password')
   async forgotPassword(@Body() { username }: ForgotPasswordDto): Promise<any> {
-    const user = await this.userService.getUserByUsername(username);
+    let userToUpdate = await this.userService.getUserByUsername(username);
 
-    // even if the user does not exist, return ok anyway
-    if (!user) {
+    if (!userToUpdate) {
       return {
-        message: 'ok',
+        message: 'password changed',
+        status: HttpStatus.OK,
       };
     }
+
+    userToUpdate = await this.userService.forgotPassword(userToUpdate);
+    return {
+      message: 'password changed',
+      status: HttpStatus.OK,
+    };
   }
 
   @Public()
@@ -44,16 +56,22 @@ export class SecurityController {
   async changePassword(
     @Request() req,
     @Body() { password, newPassword }: ChangePasswordDto,
-  ): Promise<any> {
+  ): Promise<ApiResponseDto> {
     const username = req.username;
     const user = await this.securityService.validateUser(username, password);
 
     if (!user) {
       return {
         message: 'incorrect password',
+        status: HttpStatus.BAD_REQUEST,
       };
     }
 
     await this.userService.changePassword(user, newPassword);
+
+    return {
+      message: 'password changed',
+      status: HttpStatus.OK,
+    };
   }
 }

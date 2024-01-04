@@ -1,5 +1,4 @@
 import { AbstractBaseController } from '@app/base/base.controller';
-import { ForgotPasswordDto } from '@app/core/dto/security.dto';
 import { RegisterUserDto, UserDto } from '@app/core/dto/user.dto';
 import { UserService } from '@app/core/module/user/user.service';
 import { Public } from '@app/core/security/public.decorator';
@@ -34,19 +33,11 @@ export class CommonController extends AbstractBaseController {
   }
 
   @Public()
-  @Post('/forgot-password')
-  async fotgot(@Body() { username }: ForgotPasswordDto): Promise<any> {
-    let userToUpdate = await this.userService.getUserByUsername(username);
+  @Get('profile')
+  async getProfile(@Request() request): Promise<UserDto> {
+    const user = await this.userService.getUserByUsername(request.username);
 
-    if (!userToUpdate) {
-      return {
-        message: 'password changed',
-      };
-    }
-
-    userToUpdate = await this.userService.forgotPassword(userToUpdate);
-    return {
-      message: 'password changed',
-    };
+    const { password, ...result } = user;
+    return result;
   }
 }
