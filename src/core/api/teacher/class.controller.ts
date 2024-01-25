@@ -15,7 +15,6 @@ import {
   Get,
   HttpStatus,
   NotFoundException,
-  NotImplementedException,
   Param,
   Patch,
   Post,
@@ -135,7 +134,7 @@ export class ClassController extends AbstractCrudController {
       };
     }
 
-    const enrolledClass = await this.classService.unEnrollStudents(
+    const enrolledClass = await this.classService.enrollStudents(
       lstEnrollingStudents,
       classToEnroll,
     );
