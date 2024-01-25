@@ -47,3 +47,8 @@ export class ClassEnrollDto {
   @IsNotEmpty()
   studentIds: string[];
 }
+
+export class AttendanceSheetDto {
+  @ApiProperty()
+  studentIds: string[];
+}

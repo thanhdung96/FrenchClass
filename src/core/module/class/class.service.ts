@@ -2,10 +2,15 @@ import { AbstractCrudService } from '@app/base/base.service';
 import { ClassDto, CreateClassDto } from '@app/core/dto/class.dto';
 import { PaginationDto } from '@app/core/dto/pagination.dto';
 import { AbstractValidateResult } from '@app/core/dto/validate.dto';
-import { Injectable, NotImplementedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { SessionService } from '../session/session.service';
 import { StudentDto } from '@app/core/dto/student.dto';
-import { Class } from '@prisma/client';
+import {
+  PrismaClass,
+  PrismaClassDetail,
+  PrismaClassDetailType,
+  PrismaClassType,
+} from '@app/core/types/class.type';
 
 @Injectable()
 export class ClassService extends AbstractCrudService {
@@ -16,7 +21,7 @@ export class ClassService extends AbstractCrudService {
   async update(
     id: string,
     { sessions, studentIds, mainTeacherId, ...classDto }: CreateClassDto,
-  ): Promise<Class> {
+  ): Promise<PrismaClassDetailType> {
     const updatedClass = await this.prisma.class.update({
       where: {
         id,
@@ -32,16 +37,7 @@ export class ClassService extends AbstractCrudService {
           },
         },
       },
-
-      include: {
-        sessions: {
-          select: {
-            id: true,
-            sessionName: true,
-            description: true,
-          },
-        },
-      },
+      ...PrismaClassDetail,
     });
     await this.sessionService.saveManyAndAssign(sessions, updatedClass);
     return await this.getById(id);
@@ -52,7 +48,7 @@ export class ClassService extends AbstractCrudService {
     studentIds,
     mainTeacherId,
     ...classDto
-  }: CreateClassDto): Promise<Class> {
+  }: CreateClassDto): Promise<PrismaClassDetailType> {
     const newClass = await this.prisma.class.create({
       data: {
         ...classDto,
@@ -70,21 +66,13 @@ export class ClassService extends AbstractCrudService {
           },
         },
       },
-      include: {
-        sessions: {
-          select: {
-            id: true,
-            sessionName: true,
-            description: true,
-          },
-        },
-      },
+      ...PrismaClassDetail,
     });
 
     return newClass;
   }
 
-  async saveMany(entities: ClassDto[]): Promise<ClassDto[]> {
+  async saveMany(entities: ClassDto[]): Promise<PrismaClassDetailType[]> {
     throw new Error('Method not implemented.');
   }
 
@@ -102,53 +90,29 @@ export class ClassService extends AbstractCrudService {
     throw new Error('Method not implemented.');
   }
 
-  async getAll(pagination: PaginationDto): Promise<ClassDto[]> {
+  async getAll(pagination: PaginationDto): Promise<PrismaClassType[]> {
     return await this.prisma.class.findMany({
-      include: {
-        mainTeacher: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            phoneNumber: true,
-            email: true,
-          },
-        },
-      },
+      ...PrismaClassDetail,
       skip: pagination.page * pagination.size,
       take: pagination.size,
     });
   }
 
-  async getById(id: string): Promise<Class> {
+  async getById(id: string): Promise<PrismaClassDetailType> {
     const classDetail = await this.prisma.class.findFirst({
       where: {
         id,
       },
-      include: {
-        mainTeacher: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            phoneNumber: true,
-            email: true,
-          },
-        },
-        sessions: {
-          select: {
-            id: true,
-            sessionName: true,
-            description: true,
-          },
-        },
-      },
+      ...PrismaClassDetail,
     });
 
     return classDetail;
   }
 
-  async getOneByIdAndTeacher(id: string, teacherId: string): Promise<Class> {
+  async getOneByIdAndTeacher(
+    id: string,
+    teacherId: string,
+  ): Promise<PrismaClassDetailType> {
     return await this.prisma.class.findFirst({
       where: {
         id,
@@ -156,57 +120,21 @@ export class ClassService extends AbstractCrudService {
           id: teacherId,
         },
       },
-      include: {
-        mainTeacher: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            phoneNumber: true,
-            email: true,
-          },
-        },
-        sessions: {
-          select: {
-            id: true,
-            sessionName: true,
-            description: true,
-          },
-        },
-        students: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            phoneNumber: true,
-            email: true,
-          },
-        },
-      },
+      ...PrismaClassDetail,
     });
   }
 
   async getManyByFilter(
     { mainTeacherId }: CreateClassDto,
     pagination: PaginationDto,
-  ): Promise<Class[]> {
+  ): Promise<PrismaClassType[]> {
     return await this.prisma.class.findMany({
       where: {
         mainTeacher: {
           id: mainTeacherId,
         },
       },
-      include: {
-        mainTeacher: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            phoneNumber: true,
-            email: true,
-          },
-        },
-      },
+      ...PrismaClass,
       skip: pagination.page * pagination.size,
       take: Number(pagination.size),
     });
@@ -215,7 +143,7 @@ export class ClassService extends AbstractCrudService {
   async enrollStudents(
     students: StudentDto[],
     classToEnroll: ClassDto,
-  ): Promise<Class> {
+  ): Promise<PrismaClassType> {
     const enrolledClass = await this.prisma.class.update({
       where: {
         id: classToEnroll.id,
@@ -225,10 +153,9 @@ export class ClassService extends AbstractCrudService {
           connect: students.map((student) => ({ id: student.id })),
         },
       },
-      include: {
-        students: true,
-      },
+      ...PrismaClass,
     });
+    console.log(enrolledClass);
 
     return enrolledClass;
   }
@@ -236,7 +163,7 @@ export class ClassService extends AbstractCrudService {
   async unEnrollStudents(
     students: StudentDto[],
     classToEnroll: ClassDto,
-  ): Promise<Class> {
+  ): Promise<PrismaClassType> {
     const enrolledClass = await this.prisma.class.update({
       where: {
         id: classToEnroll.id,
@@ -246,11 +173,21 @@ export class ClassService extends AbstractCrudService {
           disconnect: students.map((student) => ({ id: student.id })),
         },
       },
-      include: {
-        students: true,
-      },
+      ...PrismaClass,
     });
 
     return enrolledClass;
+  }
+
+  async checkIfStudentEnrolled(
+    classIdToCheck: string,
+    studentId: string,
+  ): Promise<boolean> {
+    const classToCheck = await this.getById(classIdToCheck);
+    const ret = classToCheck.students.find((student) => {
+      return student.id === studentId;
+    });
+
+    return ret !== undefined;
   }
 }

@@ -3,7 +3,7 @@ import { ClassDto, SessionDto } from '@app/core/dto/class.dto';
 import { PaginationDto } from '@app/core/dto/pagination.dto';
 import { AbstractValidateResult } from '@app/core/dto/validate.dto';
 import { Injectable } from '@nestjs/common';
-import { PrismaPromise } from '@prisma/client';
+import { PrismaPromise, Session } from '@prisma/client';
 
 @Injectable()
 export class SessionService extends AbstractCrudService {
@@ -11,8 +11,15 @@ export class SessionService extends AbstractCrudService {
     super();
   }
 
-  update(id: string, entity: SessionDto): Promise<SessionDto> {
-    throw new Error('Method not implemented.');
+  async update(id: string, entity: Session): Promise<Session> {
+    return await this.prisma.session.update({
+      where: {
+        id,
+      },
+      data: {
+        ...entity,
+      },
+    });
   }
 
   save(entity: SessionDto): Promise<SessionDto> {
@@ -86,6 +93,22 @@ export class SessionService extends AbstractCrudService {
 
   getById(id: string): Promise<SessionDto> {
     throw new Error('Method not implemented.');
+  }
+
+  async getByIdAndMainTeacher(
+    id: string,
+    mainTeacher: string,
+  ): Promise<Session> {
+    return this.prisma.session.findFirst({
+      where: {
+        id,
+        class: {
+          mainTeacher: {
+            id: mainTeacher,
+          },
+        },
+      },
+    });
   }
 
   getManyByFilter(

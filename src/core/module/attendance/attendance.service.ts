@@ -1,8 +1,10 @@
 import { AbstractBaseDto } from '@app/base/base.model';
 import { AbstractCrudService } from '@app/base/base.service';
+import { AttendanceSheetDto } from '@app/core/dto/class.dto';
 import { PaginationDto } from '@app/core/dto/pagination.dto';
 import { AbstractValidateResult } from '@app/core/dto/validate.dto';
 import { Injectable } from '@nestjs/common';
+import { AttendanceDetail, PrismaPromise, Session } from '@prisma/client';
 
 @Injectable()
 export class AttendanceService extends AbstractCrudService {
@@ -46,5 +48,32 @@ export class AttendanceService extends AbstractCrudService {
     validateResult: AbstractValidateResult,
   ): AbstractValidateResult {
     return validateResult;
+  }
+
+  async createAttendanceSheet(
+    { studentIds }: AttendanceSheetDto,
+    { id }: Session,
+  ): Promise<AttendanceDetail[]> {
+    const lstPromises: PrismaPromise<AttendanceDetail>[] = studentIds.map(
+      (studentId) => {
+        return this.prisma.attendanceDetail.create({
+          data: {
+            session: {
+              connect: {
+                id,
+              },
+            },
+            student: {
+              connect: {
+                id: studentId,
+              },
+            },
+          },
+        });
+      },
+    );
+    const lstAttendanceDetails = await this.prisma.$transaction(lstPromises);
+
+    return lstAttendanceDetails;
   }
 }
