@@ -1,4 +1,5 @@
 import { AbstractBaseController } from '@app/base/base.controller';
+import { ApiResponseDto } from '@app/core/dto/response.dto';
 import { RegisterUserDto, UserDto } from '@app/core/dto/user.dto';
 import { UserService } from '@app/core/module/user/user.service';
 import { Public } from '@app/core/security/public.decorator';
@@ -7,6 +8,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpStatus,
   Post,
   Request,
 } from '@nestjs/common';
@@ -39,5 +41,18 @@ export class CommonController extends AbstractBaseController {
     const { password, ...returnData } = userProfile;
 
     return returnData;
+  }
+
+  @Get('health-check')
+  @Public()
+  async healthCheck(): Promise<ApiResponseDto> {
+    const steacher = await this.userService.getUserByUsername('steacher');
+
+    if (steacher) {
+      return {
+        status: HttpStatus.OK,
+        message: 'ok',
+      };
+    }
   }
 }
