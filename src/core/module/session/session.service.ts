@@ -4,6 +4,12 @@ import { PaginationDto } from '@app/core/dto/pagination.dto';
 import { AbstractValidateResult } from '@app/core/dto/validate.dto';
 import { Injectable } from '@nestjs/common';
 import { PrismaPromise, Session } from '@prisma/client';
+import {
+  PrismaClassSession,
+  PrismaClassSessionDetail,
+  PrismaClassSessionDetailType,
+  PrismaClassSessionType,
+} from '@app/core/types/session.type';
 
 @Injectable()
 export class SessionService extends AbstractCrudService {
@@ -11,7 +17,10 @@ export class SessionService extends AbstractCrudService {
     super();
   }
 
-  async update(id: string, entity: Session): Promise<Session> {
+  async update(
+    id: string,
+    entity: SessionDto,
+  ): Promise<PrismaClassSessionType> {
     return await this.prisma.session.update({
       where: {
         id,
@@ -19,6 +28,7 @@ export class SessionService extends AbstractCrudService {
       data: {
         ...entity,
       },
+      ...PrismaClassSession,
     });
   }
 
@@ -33,13 +43,14 @@ export class SessionService extends AbstractCrudService {
   async saveManyAndAssign(
     entities: SessionDto[],
     classDto: ClassDto,
-  ): Promise<SessionDto[]> {
-    let promises: PrismaPromise<SessionDto>[] = [];
+  ): Promise<PrismaClassSessionType[]> {
+    let promises: PrismaPromise<PrismaClassSessionType>[] = [];
     entities.map((entity) => {
       if (!entity.id) {
         const { id, created, updated, ...datatoSave } = entity;
         promises.push(
           this.prisma.session.create({
+            ...PrismaClassSession,
             data: {
               ...datatoSave,
               class: {
@@ -53,6 +64,7 @@ export class SessionService extends AbstractCrudService {
       } else {
         promises.push(
           this.prisma.session.update({
+            ...PrismaClassSession,
             where: {
               id: entity.id,
             },
@@ -69,9 +81,7 @@ export class SessionService extends AbstractCrudService {
         );
       }
     });
-    const sessions: SessionDto[] = await this.prisma.$transaction(promises);
-
-    return sessions;
+    return await this.prisma.$transaction(promises);
   }
 
   delete(entity: SessionDto): Promise<boolean> {
@@ -98,8 +108,11 @@ export class SessionService extends AbstractCrudService {
   async getByIdAndMainTeacher(
     id: string,
     mainTeacher: string,
-  ): Promise<Session> {
+  ): Promise<PrismaClassSessionDetailType> {
     return this.prisma.session.findFirst({
+      include: {
+        ...PrismaClassSessionDetail.include,
+      },
       where: {
         id,
         class: {
@@ -114,7 +127,7 @@ export class SessionService extends AbstractCrudService {
   getManyByFilter(
     filter: SessionDto,
     pagination: PaginationDto,
-  ): Promise<SessionDto[]> {
+  ): Promise<PrismaClassSessionType[]> {
     throw new Error('Method not implemented.');
   }
 }

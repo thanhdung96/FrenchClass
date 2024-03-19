@@ -1,9 +1,5 @@
 import { AbstractCrudController } from '@app/base/base.controller';
-import {
-  ClassDto,
-  ClassEnrollDto,
-  CreateClassDto,
-} from '@app/core/dto/class.dto';
+import { ClassEnrollDto, CreateClassDto } from '@app/core/dto/class.dto';
 import { PaginationDto } from '@app/core/dto/pagination.dto';
 import { ApiResponseDto } from '@app/core/dto/response.dto';
 import { StudentDto } from '@app/core/dto/student.dto';
@@ -22,7 +18,10 @@ import {
   Request,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { Class } from '@prisma/client';
+import {
+  PrismaClassDetailType,
+  PrismaClassType,
+} from '@app/core/types/class.type';
 
 @Controller('classes')
 @ApiTags('classes')
@@ -38,11 +37,9 @@ export class ClassController extends AbstractCrudController {
   async create(
     @Request() request: any,
     @Body() data: CreateClassDto,
-  ): Promise<Class> {
+  ): Promise<PrismaClassDetailType> {
     data.mainTeacherId = request.user.id;
-    const newClass = await this.classService.save({ ...data });
-
-    return newClass;
+    return await this.classService.save({ ...data });
   }
 
   @Patch(':id')
@@ -50,7 +47,7 @@ export class ClassController extends AbstractCrudController {
     @Request() request: any,
     @Param('id') id: string,
     @Body() data: CreateClassDto,
-  ): Promise<Class> {
+  ): Promise<PrismaClassDetailType> {
     const classDetail = await this.classService.getOneByIdAndTeacher(
       id,
       request.user.id,
@@ -59,33 +56,29 @@ export class ClassController extends AbstractCrudController {
       throw new NotFoundException();
     }
 
-    const updatedClass = await this.classService.update(id, data);
-
-    return updatedClass;
+    return await this.classService.update(id, data);
   }
 
   @Get()
   async index(
     @Request() request: any,
     @Query() pagination: PaginationDto,
-  ): Promise<Class[]> {
+  ): Promise<PrismaClassType[]> {
     const filter = new CreateClassDto();
-    const classes = await this.classService.getManyByFilter(
+    return await this.classService.getManyByFilter(
       {
         ...filter,
         mainTeacherId: request.user.id,
       },
       pagination,
     );
-
-    return classes;
   }
 
   @Get(':id')
   async detail(
     @Request() request: any,
     @Param('id') id: string,
-  ): Promise<Class> {
+  ): Promise<PrismaClassDetailType> {
     const classDetail = await this.classService.getOneByIdAndTeacher(
       id,
       request.user.id,
@@ -103,7 +96,7 @@ export class ClassController extends AbstractCrudController {
     @Request() request,
     @Param('classId') classId: string,
     @Body() { studentIds }: ClassEnrollDto,
-  ): Promise<ClassDto | ApiResponseDto> {
+  ): Promise<PrismaClassType | ApiResponseDto> {
     const classToEnroll = await this.classService.getOneByIdAndTeacher(
       classId,
       request.user.id,
@@ -134,12 +127,10 @@ export class ClassController extends AbstractCrudController {
       };
     }
 
-    const enrolledClass = await this.classService.enrollStudents(
+    return await this.classService.enrollStudents(
       lstEnrollingStudents,
       classToEnroll,
     );
-
-    return enrolledClass;
   }
 
   @Post('unenroll/:classId')
@@ -147,7 +138,7 @@ export class ClassController extends AbstractCrudController {
     @Request() request,
     @Param('classId') classId: string,
     @Body() { studentIds }: ClassEnrollDto,
-  ): Promise<ClassDto | ApiResponseDto> {
+  ): Promise<PrismaClassType | ApiResponseDto> {
     const classToEnroll = await this.classService.getOneByIdAndTeacher(
       classId,
       request.user.id,
@@ -178,11 +169,9 @@ export class ClassController extends AbstractCrudController {
       };
     }
 
-    const resultClass = await this.classService.unEnrollStudents(
+    return await this.classService.unEnrollStudents(
       lstUnenrollingStudents,
       classToEnroll,
     );
-
-    return resultClass;
   }
 }

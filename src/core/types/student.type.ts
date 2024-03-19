@@ -1,4 +1,6 @@
 import { Prisma } from '@prisma/client';
+import { PrismaClassInfo } from '@app/core/types/class.type';
+import { PrismaClassSession } from '@app/core/types/session.type';
 
 export const PrismaStudent = Prisma.validator<Prisma.StudentDefaultArgs>()({
   select: {
@@ -12,14 +14,18 @@ export const PrismaStudent = Prisma.validator<Prisma.StudentDefaultArgs>()({
   },
 });
 
-export type PrismaUserType = Prisma.StudentGetPayload<typeof PrismaStudent>;
+export type PrismaStudentType = Prisma.StudentGetPayload<typeof PrismaStudent>;
 
 export const PrismaStudentDetail =
   Prisma.validator<Prisma.StudentDefaultArgs>()({
     ...PrismaStudent,
     include: {
-      enrolledClasses: true,
-      attendedSession: true,
+      enrolledClasses: {
+        ...PrismaClassInfo,
+      },
+      attendedSession: {
+        ...PrismaClassSession,
+      },
       paymentHistories: true,
     },
   });

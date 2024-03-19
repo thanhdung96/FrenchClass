@@ -37,7 +37,9 @@ export class ClassService extends AbstractCrudService {
           },
         },
       },
-      ...PrismaClassDetail,
+      include: {
+        ...PrismaClassDetail.include,
+      },
     });
     await this.sessionService.saveManyAndAssign(sessions, updatedClass);
     return await this.getById(id);
@@ -49,7 +51,7 @@ export class ClassService extends AbstractCrudService {
     mainTeacherId,
     ...classDto
   }: CreateClassDto): Promise<PrismaClassDetailType> {
-    const newClass = await this.prisma.class.create({
+    return await this.prisma.class.create({
       data: {
         ...classDto,
         sessions: {
@@ -66,10 +68,10 @@ export class ClassService extends AbstractCrudService {
           },
         },
       },
-      ...PrismaClassDetail,
+      include: {
+        ...PrismaClassDetail.include,
+      },
     });
-
-    return newClass;
   }
 
   async saveMany(entities: ClassDto[]): Promise<PrismaClassDetailType[]> {
@@ -92,21 +94,23 @@ export class ClassService extends AbstractCrudService {
 
   async getAll(pagination: PaginationDto): Promise<PrismaClassType[]> {
     return await this.prisma.class.findMany({
-      ...PrismaClassDetail,
+      include: {
+        ...PrismaClassDetail.include,
+      },
       skip: pagination.page * pagination.size,
       take: pagination.size,
     });
   }
 
   async getById(id: string): Promise<PrismaClassDetailType> {
-    const classDetail = await this.prisma.class.findFirst({
+    return await this.prisma.class.findFirst({
       where: {
         id,
       },
-      ...PrismaClassDetail,
+      include: {
+        ...PrismaClassDetail.include,
+      },
     });
-
-    return classDetail;
   }
 
   async getOneByIdAndTeacher(
@@ -120,7 +124,9 @@ export class ClassService extends AbstractCrudService {
           id: teacherId,
         },
       },
-      ...PrismaClassDetail,
+      include: {
+        ...PrismaClassDetail.include,
+      },
     });
   }
 
@@ -134,7 +140,9 @@ export class ClassService extends AbstractCrudService {
           id: mainTeacherId,
         },
       },
-      ...PrismaClass,
+      include: {
+        ...PrismaClass.include,
+      },
       skip: pagination.page * pagination.size,
       take: Number(pagination.size),
     });
@@ -153,10 +161,10 @@ export class ClassService extends AbstractCrudService {
           connect: students.map((student) => ({ id: student.id })),
         },
       },
-      ...PrismaClass,
+      include: {
+        ...PrismaClass.include,
+      },
     });
-    console.log(enrolledClass);
-
     return enrolledClass;
   }
 
@@ -164,7 +172,7 @@ export class ClassService extends AbstractCrudService {
     students: StudentDto[],
     classToEnroll: ClassDto,
   ): Promise<PrismaClassType> {
-    const enrolledClass = await this.prisma.class.update({
+    return await this.prisma.class.update({
       where: {
         id: classToEnroll.id,
       },
@@ -173,10 +181,10 @@ export class ClassService extends AbstractCrudService {
           disconnect: students.map((student) => ({ id: student.id })),
         },
       },
-      ...PrismaClass,
+      include: {
+        ...PrismaClass.include,
+      },
     });
-
-    return enrolledClass;
   }
 
   async checkIfStudentEnrolled(

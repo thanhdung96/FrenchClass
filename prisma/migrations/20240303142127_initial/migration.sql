@@ -20,7 +20,7 @@ CREATE TABLE "User" (
     "username" VARCHAR(64) NOT NULL,
     "email" VARCHAR(128),
     "phoneNumber" VARCHAR(16),
-    "password" CHAR(128) NOT NULL,
+    "password" VARCHAR(128) NOT NULL,
     "role" "UserRole" NOT NULL DEFAULT 'TEACHER',
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
