@@ -14,7 +14,8 @@ import {
   Request,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { AttendanceDetail, Session } from '@prisma/client';
+import { AttendanceDetail } from '@prisma/client';
+import { PrismaClassSessionType } from '@app/core/types/session.type';
 
 @Controller('sessions')
 @ApiTags('sessions')
@@ -35,7 +36,7 @@ export class SessionController extends AbstractReadonlyController {
     @Request() request: any,
     @Param('id') id: string,
     @Body() sessionDto: SessionDto,
-  ): Promise<Session> {
+  ): Promise<PrismaClassSessionType> {
     const sessionDetail = await this.sessionService.getByIdAndMainTeacher(
       id,
       request.user.id,
@@ -45,16 +46,14 @@ export class SessionController extends AbstractReadonlyController {
       throw new NotFoundException('sesison not found');
     }
 
-    const updatedSession = this.sessionService.update(id, sessionDetail);
-
-    return updatedSession;
+    return this.sessionService.update(id, sessionDto);
   }
 
   @Get(':id')
   async detail(
     @Request() request: any,
     @Param('id') id: string,
-  ): Promise<SessionDto> {
+  ): Promise<PrismaClassSessionType> {
     const sessionDetail = await this.sessionService.getByIdAndMainTeacher(
       id,
       request.user.id,

@@ -1,6 +1,6 @@
 import { AbstractBaseController } from '@app/base/base.controller';
 import { ApiResponseDto } from '@app/core/dto/response.dto';
-import { RegisterUserDto, UserDto } from '@app/core/dto/user.dto';
+import { RegisterUserDto } from '@app/core/dto/user.dto';
 import { UserService } from '@app/core/module/user/user.service';
 import { Public } from '@app/core/security/public.decorator';
 import {
@@ -13,6 +13,10 @@ import {
   Request,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import {
+  PrismaUserDetailType,
+  PrismaUserType,
+} from '@app/core/types/user.type';
 
 @Controller()
 @ApiTags('app')
@@ -23,24 +27,18 @@ export class CommonController extends AbstractBaseController {
 
   @Public()
   @Post('register')
-  async register(@Body() userDto: RegisterUserDto): Promise<UserDto> {
+  async register(@Body() userDto: RegisterUserDto): Promise<PrismaUserType> {
     const validateResult = await this.userService.validate(userDto);
     if (!validateResult.isValid) {
       throw new BadRequestException(validateResult.messages);
     }
 
-    const user = await this.userService.register(userDto);
-
-    return user;
+    return await this.userService.register(userDto);
   }
 
   @Get('/profile')
-  async getProfile(@Request() request): Promise<UserDto> {
-    const userProfile = await this.userService.getById(request.user.id);
-
-    const { password, ...returnData } = userProfile;
-
-    return returnData;
+  async getProfile(@Request() request): Promise<PrismaUserDetailType> {
+    return await this.userService.getById(request.user.id);
   }
 
   @Get('health-check')

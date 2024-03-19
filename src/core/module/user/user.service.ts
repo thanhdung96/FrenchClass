@@ -6,6 +6,13 @@ import { RegistrationValidateResult } from '@app/core/dto/validate.dto';
 import { Injectable } from '@nestjs/common';
 import { DEFAULT_USER_PASSWORD } from 'src/app/constants';
 import { encryptPassword } from 'src/app/encryption.service';
+import {
+  PrismaUserDetailType,
+  PrismaUserSecurity,
+  PrismaUserSecurityType,
+  PrismaUserType,
+} from '@app/core/types/user.type';
+import { PrismaClassInfo } from '@app/core/types/class.type';
 
 @Injectable()
 export class UserService extends AbstractCrudService {
@@ -17,17 +24,15 @@ export class UserService extends AbstractCrudService {
     throw new Error('Method not implemented.');
   }
 
-  async register(userDto: RegisterUserDto): Promise<UserDto> {
+  async register(userDto: RegisterUserDto): Promise<PrismaUserType> {
     userDto.password = await encryptPassword(
       userDto.password || DEFAULT_USER_PASSWORD,
     );
-    const user = await this.save(userDto);
 
-    const { password, ...result } = user;
-    return result;
+    return await this.save(userDto);
   }
 
-  async save(userDto: RegisterUserDto): Promise<UserDto> {
+  async save(userDto: RegisterUserDto): Promise<PrismaUserType> {
     const user = await this.prisma.user.create({
       data: {
         ...userDto,
@@ -49,23 +54,33 @@ export class UserService extends AbstractCrudService {
     throw new Error('Method not implemented.');
   }
 
-  async getById(id: string): Promise<UserDto> {
-    return await this.prisma.user.findFirst({
+  async getById(id: string): Promise<PrismaUserDetailType> {
+    return this.prisma.user.findFirst({
       where: {
         id,
+      },
+      include: {
+        class: {
+          ...PrismaClassInfo,
+        },
       },
     });
   }
 
-  async getUserByUsername(username: string): Promise<UserDto | null> {
-    return await this.prisma.user.findFirst({ where: { username } });
+  async getUserByUsername(
+    username: string,
+  ): Promise<PrismaUserSecurityType | null> {
+    return await this.prisma.user.findFirst({
+      where: { username },
+      ...PrismaUserSecurity,
+    });
   }
 
   async getManyByFilter(
     filter: AbstractBaseDto,
     pagination: PaginationDto,
-  ): Promise<UserDto[]> {
-    return await this.prisma.user.findMany({
+  ): Promise<PrismaUserType[]> {
+    return this.prisma.user.findMany({
       where: { ...filter },
       skip: pagination.page * pagination.size,
       take: pagination.size,

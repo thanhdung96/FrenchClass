@@ -20,7 +20,7 @@ model User {
   username    String   @unique @db.VarChar(64)
   email       String?  @unique @db.VarChar(128)
   phoneNumber String?  @db.VarChar(16)
-  password    String   @db.Char(128)
+  password    String   @db.VarChar(128)
   role        UserRole @default(TEACHER)
 
   class Class[]

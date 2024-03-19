@@ -15,6 +15,10 @@ import {
   Request,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import {
+  PrismaStudentDetailType,
+  PrismaStudentType,
+} from '@app/core/types/student.type';
 
 @Controller('students')
 @ApiTags('student')
@@ -27,7 +31,7 @@ export class StudentController extends AbstractCrudController {
   async index(
     @Request() request: any,
     @Query() query: StudentPaginationDto,
-  ): Promise<StudentDto[]> {
+  ): Promise<PrismaStudentType[]> {
     return await this.studentService.getAll(query);
   }
 
@@ -35,16 +39,14 @@ export class StudentController extends AbstractCrudController {
   async create(
     @Request() request: any,
     @Body() studentDto: StudentDto,
-  ): Promise<StudentDto> {
+  ): Promise<PrismaStudentType> {
     const validateResult = await this.studentService.validate(studentDto);
-    console.log(validateResult);
 
     if (!validateResult.isValid) {
       throw new BadRequestException(validateResult.messages);
     }
 
-    const student = await this.studentService.save(studentDto);
-    return student;
+    return await this.studentService.save(studentDto);
   }
 
   @Patch(':id')
@@ -52,8 +54,8 @@ export class StudentController extends AbstractCrudController {
     @Request() request: any,
     @Param('id') id: string,
     @Body() studentDto: StudentDto,
-  ): Promise<StudentDto> {
-    let student = await this.studentService.getById(id);
+  ): Promise<PrismaStudentType> {
+    const student = await this.studentService.getById(id);
     if (!student) {
       throw new NotFoundException();
     }
@@ -62,7 +64,7 @@ export class StudentController extends AbstractCrudController {
   }
 
   @Get(':id')
-  async detail(@Param('id') id: string): Promise<StudentDto> {
+  async detail(@Param('id') id: string): Promise<PrismaStudentDetailType> {
     const student = await this.studentService.getById(id);
     if (!student) {
       throw new NotFoundException();

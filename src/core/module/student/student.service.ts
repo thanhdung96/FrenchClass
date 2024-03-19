@@ -6,11 +6,14 @@ import {
   StudentPaginationDto,
 } from '@app/core/dto/pagination.dto';
 import { StudentDto } from '@app/core/dto/student.dto';
-import {
-  AbstractValidateResult,
-  StudentValidateResult,
-} from '@app/core/dto/validate.dto';
+import { StudentValidateResult } from '@app/core/dto/validate.dto';
 import { Injectable } from '@nestjs/common';
+import {
+  PrismaStudent,
+  PrismaStudentDetail,
+  PrismaStudentDetailType,
+  PrismaStudentType,
+} from '@app/core/types/student.type';
 
 @Injectable()
 export class StudentService extends AbstractCrudService {
@@ -18,60 +21,58 @@ export class StudentService extends AbstractCrudService {
     super();
   }
 
-  async save(entity: StudentDto): Promise<StudentDto> {
-    const student = await this.prisma.student.create({
+  async save(entity: StudentDto): Promise<PrismaStudentType> {
+    return await this.prisma.student.create({
       data: {
         ...entity,
       },
+      ...PrismaStudent,
     });
-
-    return student;
   }
 
-  async saveMany(entities: StudentDto[]): Promise<StudentDto[]> {
+  async saveMany(entities: StudentDto[]): Promise<PrismaStudentType[]> {
     throw new Error('Method not implemented.');
   }
 
-  async update(id: string, entity: StudentDto): Promise<StudentDto> {
-    const student = await this.prisma.student.update({
+  async update(id: string, entity: StudentDto): Promise<PrismaStudentType> {
+    return await this.prisma.student.update({
       where: {
         id,
       },
       data: {
         ...entity,
       },
+      ...PrismaStudent,
     });
-
-    return student;
   }
 
   async delete(entity: StudentDto): Promise<boolean> {
     throw new Error('Method not implemented.');
   }
 
-  async getAll(pagination: StudentPaginationDto): Promise<StudentDto[]> {
-    const students = await this.prisma.student.findMany({
+  async getAll(pagination: StudentPaginationDto): Promise<PrismaStudentType[]> {
+    return await this.prisma.student.findMany({
+      ...PrismaStudent,
       skip: pagination.page * pagination.size,
       take: Number(pagination.size),
     });
-
-    return students;
   }
 
-  async getById(id: string): Promise<StudentDto> {
-    const student = await this.prisma.student.findUnique({
+  async getById(id: string): Promise<PrismaStudentDetailType> {
+    return await this.prisma.student.findUnique({
+      include: {
+        ...PrismaStudentDetail.include,
+      },
       where: {
         id,
       },
     });
-
-    return student;
   }
 
   async getManyByFilter(
     filter: AbstractBaseDto,
     pagination: PaginationDto,
-  ): Promise<StudentDto[]> {
+  ): Promise<PrismaStudentType[]> {
     throw new Error('Method not implemented.');
   }
 
