@@ -58,6 +58,25 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Containerisation
+
+Build the image:
+
+```
+$ docker build -t=frenchclass:latest -f .\Dockerfile .
+```
+
+Start the container:
+
+```
+$ docker run -p "3000:3000" \
+-e "PORT=3000" \
+-e "JWT_SECRET=hello" \
+-e "JWT_DURATION=1d" \
+-e "DATABASE_URL=postgres://postgres:password@localhost/postgres" \
+-d --name test_fc thanhdung96/frenchclass:latest
+```
+
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
