@@ -14,15 +14,7 @@ RUN npx prisma generate
 
 RUN npm run build
 
-# run step
-FROM node:alpine
-
-WORKDIR /app
-
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/entry.sh /entry.sh
+RUN mv entry.sh /
 
 EXPOSE 3000
 
