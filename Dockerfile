@@ -18,4 +18,6 @@ RUN mv entry.sh /
 
 EXPOSE 3000
 
+RUN chmod 764 /entry.sh
+
 ENTRYPOINT "/entry.sh"
